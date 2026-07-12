@@ -1,5 +1,5 @@
-# Home NAS
-
+# Local NAS
+![Local-NAS](https://socialify.git.ci/Anubhav-Ghosh1/Local-NAS/image?name=1&owner=1&stargazers=1&theme=Dark)
 A self-hosted file server for your home network. Browse, upload, edit, and stream
 files from one or more root directories, with per-user access control and an
 activity log. Built with FastAPI and a static HTML/JS frontend.
