@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home NAS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#1c1c1e;--sb:#252528;--sf:#2c2c2e;--sf2:#3a3a3c;--sf3:#48484a;
+  --ac:#0a84ff;--ac2:#0066cc;
+  --t1:#f2f2f7;--t2:#aeaeb2;--t3:#636366;
+  --bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.13);
+  --red:#ff453a;--grn:#30d158;--ylw:#ffd60a;--pur:#bf5af2;--org:#ff9f0a;
+  --sbw:220px;--ifw:256px;--tbh:44px;--mbh:70px;
+  /* theme tokens */
+  --tb-bg:rgba(36,36,38,.96);--tool-bg:rgba(30,30,32,.5);--mb-bg:rgba(28,28,32,.97);
+  --ctx-bg:rgba(44,44,46,.97);--dlbar-bg:rgba(44,44,46,.97);
+  --glass:rgba(255,255,255,.07);--glass-h:rgba(255,255,255,.12);
+  --hover:rgba(255,255,255,.05);--card-bg:rgba(44,44,46,.92);
+  --login-bg:radial-gradient(ellipse at 50% 25%,#1a2040 0%,#0e0e14 70%);
+  --toast-ok-bg:#122a1c;--toast-ok-c:#6ee7a0;--toast-ok-bd:#30d158;
+  --toast-err-bg:#2a1212;--toast-err-c:#ff8580;--toast-err-bd:#ff453a;
+  --toast-warn-bg:#2a2000;--toast-warn-c:#ffd60a;--toast-warn-bd:#ffd60a;
+}
+[data-theme=light]{
+  --bg:#f2f2f7;--sb:#ffffff;--sf:#ffffff;--sf2:#e5e5ea;--sf3:#c7c7cc;
+  --t1:#1c1c1e;--t2:#636366;--t3:#aeaeb2;
+  --bd:rgba(0,0,0,.08);--bd2:rgba(0,0,0,.15);
+  --tb-bg:rgba(248,248,250,.97);--tool-bg:rgba(242,242,247,.9);--mb-bg:rgba(248,248,250,.97);
+  --ctx-bg:rgba(255,255,255,.97);--dlbar-bg:rgba(255,255,255,.97);
+  --glass:rgba(0,0,0,.05);--glass-h:rgba(0,0,0,.09);
+  --hover:rgba(0,0,0,.04);--card-bg:rgba(255,255,255,.95);
+  --login-bg:radial-gradient(ellipse at 50% 25%,#dde8ff 0%,#eef2ff 70%);
+  --toast-ok-bg:#e8f8ed;--toast-ok-c:#1a7a3a;--toast-ok-bd:#30d158;
+  --toast-err-bg:#fde8e8;--toast-err-c:#b91c1c;--toast-err-bd:#ff453a;
+  --toast-warn-bg:#fef3cd;--toast-warn-c:#92400e;--toast-warn-bd:#ffd60a;
+}
+body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:13px;line-height:1.4}
+
+/* ── SVG icon helper ─────────────────────────── */
+svg{display:block;flex-shrink:0}
+
+/* ── Login ───────────────────────────────────── */
+#login{display:none;align-items:center;justify-content:center;height:100vh;background:var(--login-bg)}
+#login.show{display:flex}
+.lcard{background:var(--card-bg);backdrop-filter:blur(40px) saturate(180%);border:1px solid var(--bd2);border-radius:20px;padding:44px 40px 40px;width:360px;box-shadow:0 48px 100px rgba(0,0,0,.7)}
+.lcard .brand{text-align:center;margin-bottom:24px}
+.lcard .brand svg{margin:0 auto 10px;display:block}
+.lcard h1{text-align:center;font-size:1.25rem;font-weight:700;margin-bottom:4px;letter-spacing:-.01em}
+.lcard p{text-align:center;color:var(--t3);font-size:.82rem;margin-bottom:26px}
+.lerr{background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.28);color:#ff8580;border-radius:9px;padding:9px 14px;font-size:.8rem;margin-bottom:14px;display:none}
+label{display:block;font-size:.72rem;font-weight:600;color:var(--t3);margin-bottom:4px;letter-spacing:.04em;text-transform:uppercase}
+input[type=text],input[type=password],textarea,select{width:100%;background:var(--glass);border:1px solid var(--bd2);border-radius:9px;padding:10px 13px;color:var(--t1);font-size:.88rem;font-family:inherit;outline:none;transition:border-color .18s,box-shadow .18s;margin-bottom:14px}
+input:focus,textarea:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(10,132,255,.2)}
+textarea{resize:vertical;font-family:'SF Mono','Fira Mono',monospace;font-size:.8rem;line-height:1.65;tab-size:2;min-height:280px;margin-bottom:0}
+select{cursor:pointer}
+button{cursor:pointer;border:none;border-radius:8px;padding:9px 16px;font-size:.83rem;font-weight:500;font-family:inherit;transition:all .14s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:1}
+.bp{background:var(--ac);color:#fff}
+.bp:hover{background:var(--ac2)}
+.bp:disabled{opacity:.4;cursor:not-allowed}
+.bblk{width:100%;justify-content:center}
+.bg{background:var(--glass);color:var(--t2);border:1px solid var(--bd2)}
+.bg:hover{background:var(--glass-h);color:var(--t1)}
+.bd2{background:rgba(255,69,58,.1);color:var(--red);border:1px solid rgba(255,69,58,.2)}
+.bd2:hover{background:rgba(255,69,58,.18)}
+.sm{padding:5px 11px;font-size:.77rem;border-radius:7px}
+.xs{padding:3px 8px;font-size:.7rem;border-radius:5px}
+.bi{padding:5px 7px;background:transparent;color:var(--t3);border-radius:6px;border:none}
+.bi:hover{background:var(--sf2);color:var(--t1)}
+.bi.on{color:var(--ac)}
+
+/* ── App ─────────────────────────────────────── */
+#app{display:none;flex-direction:column;height:100vh}
+#app.show{display:flex}
+
+/* ── Titlebar ────────────────────────────────── */
+.tb{height:var(--tbh);background:var(--tb-bg);backdrop-filter:blur(24px) saturate(200%);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;z-index:10}
+.dots{display:flex;gap:5px;flex-shrink:0}
+.dot{width:12px;height:12px;border-radius:50%;cursor:default}
+.dot-r{background:#ff5f57}.dot-y{background:#ffbd2e}.dot-g{background:#28c940}
+.vsep{width:1px;height:18px;background:var(--bd2);flex-shrink:0}
+.nav{display:flex;gap:2px}
+.nav button{background:transparent;border:none;color:var(--t3);padding:4px 7px;border-radius:6px;cursor:pointer;font-size:.9rem;line-height:1;transition:all .13s}
+.nav button:hover:not(:disabled){background:var(--glass-h);color:var(--t1)}
+.nav button:disabled{opacity:.25;cursor:default}
+.pbar{flex:1;display:flex;align-items:center;gap:3px;overflow:hidden;min-width:0}
+.bc-rt{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;cursor:pointer;color:var(--t2);font-size:.8rem;white-space:nowrap;transition:background .12s}
+.bc-rt:hover{background:var(--sf2);color:var(--t1)}
+.bc-rt svg{flex-shrink:0}
+.bcsep{color:var(--t3);font-size:.9rem;padding:0 1px}
+.bcseg{padding:3px 6px;border-radius:5px;cursor:pointer;color:var(--t2);font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;transition:background .12s}
+.bcseg:hover{background:var(--sf2);color:var(--t1)}
+.bcseg.last{color:var(--t1);font-weight:500}
+.tbr{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.vtog{display:flex;border:1px solid var(--bd2);border-radius:7px;overflow:hidden}
+.vtog button{border:none;border-radius:0;background:transparent;padding:5px 9px;color:var(--t3)}
+.vtog button.on{background:var(--sf2);color:var(--t1)}
+.uchip{display:flex;align-items:center;gap:6px;padding:4px 9px;border-radius:8px;cursor:pointer;color:var(--t2);font-size:.8rem;transition:background .12s}
+.uchip:hover{background:var(--sf2)}
+.av{width:22px;height:22px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ── Content ─────────────────────────────────── */
+.cnt{display:flex;flex:1;min-height:0}
+
+/* ── Sidebar ─────────────────────────────────── */
+.sb{width:var(--sbw);background:var(--sb);border-right:1px solid var(--bd);flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;padding:10px 0 16px;user-select:none}
+.sb::-webkit-scrollbar{width:0}
+.sbl{padding:5px 16px 3px;font-size:.62rem;font-weight:700;color:var(--t3);letter-spacing:.07em;text-transform:uppercase;margin-top:6px}
+.sbi{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 14px;cursor:pointer;color:var(--t2);font-size:.83rem;transition:background .1s;border-radius:6px;margin:0 6px}
+.sbi:hover{background:var(--hover);color:var(--t1)}
+.sbi.on{background:rgba(10,132,255,.14);color:var(--ac)}
+.sbi svg{flex-shrink:0;opacity:.75}
+.sbi.on svg{opacity:1}
+.sbdiv{height:1px;background:var(--bd);margin:7px 14px}
+
+/* ── Toolbar ─────────────────────────────────── */
+.tool{padding:7px 14px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--bd);flex-shrink:0;background:var(--tool-bg)}
+.swrap{display:flex;align-items:center;background:var(--glass);border:1px solid var(--bd2);border-radius:8px;overflow:hidden;flex:1;max-width:300px}
+.swrap svg{margin-left:8px;flex-shrink:0}
+.swrap input{background:transparent;border:none;padding:6px 8px;color:var(--t1);font-size:.8rem;flex:1;margin:0;border-radius:0;outline:none}
+.swrap input:focus{box-shadow:none;border:none}
+.sscope{background:transparent;border:none;border-left:1px solid var(--bd);color:var(--t3);padding:5px 8px;font-size:.75rem;cursor:pointer;white-space:nowrap;transition:color .12s}
+.sscope:hover{color:var(--t1)}
+.sscope.wide{color:var(--ac)}
+.tinfo{margin-left:auto;font-size:.73rem;color:var(--t3)}
+
+/* ── File area ───────────────────────────────── */
+.fa{flex:1;overflow-y:auto;padding:14px}
+.fa::-webkit-scrollbar{width:5px}
+.fa::-webkit-scrollbar-thumb{background:var(--sf2);border-radius:3px}
+
+/* ── Grid ────────────────────────────────────── */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:4px}
+.fc{border-radius:8px;padding:10px 8px 9px;cursor:pointer;transition:background .11s;text-align:center;position:relative;user-select:none}
+.fc:hover{background:var(--hover)}
+.fc.sel{background:rgba(10,132,255,.14);outline:1.5px solid rgba(10,132,255,.35)}
+.fci{width:52px;height:52px;border-radius:11px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fci svg{width:24px;height:24px;color:rgba(255,255,255,.88)}
+.fcn{font-size:.7rem;color:var(--t1);line-height:1.35;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:2px}
+.fcm{font-size:.62rem;color:var(--t3)}
+
+/* ── List ────────────────────────────────────── */
+.flst{display:flex;flex-direction:column;gap:1px}
+.lhdr{display:grid;grid-template-columns:24px 1fr 78px 110px 80px;gap:10px;padding:4px 10px;font-size:.68rem;color:var(--t3);font-weight:600;border-bottom:1px solid var(--bd);margin-bottom:3px;user-select:none}
+.fr{display:grid;grid-template-columns:24px 1fr 78px 110px 80px;align-items:center;gap:10px;padding:5px 10px;border-radius:6px;cursor:pointer;user-select:none;transition:background .1s}
+.fr:hover{background:var(--hover)}
+.fr.sel{background:rgba(10,132,255,.14)}
+.fr .fci{width:20px;height:20px;border-radius:4px;margin:0}
+.fr .fci svg{width:12px;height:12px}
+.frn{font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frsz,.frdt,.frk{font-size:.73rem;color:var(--t3)}
+.frsz{text-align:right}.frdt{text-align:right}
+
+/* ── Icon colors ─────────────────────────────── */
+.ic-folder{background:linear-gradient(145deg,#1d6fca,#0d4999)}
+.ic-video {background:linear-gradient(145deg,#a0283a,#6b1020)}
+.ic-audio {background:linear-gradient(145deg,#6b1ea8,#450e72)}
+.ic-image {background:linear-gradient(145deg,#0a6e85,#064d5e)}
+.ic-pdf   {background:linear-gradient(145deg,#b51c1c,#7a0f0f)}
+.ic-code  {background:linear-gradient(145deg,#0c6e46,#074a2f)}
+.ic-text  {background:linear-gradient(145deg,#8a4010,#5d2a08)}
+.ic-zip   {background:linear-gradient(145deg,#3a3a3c,#252527)}
+.ic-sheet {background:linear-gradient(145deg,#0a5c38,#063d26)}
+.ic-doc   {background:linear-gradient(145deg,#1a3d8a,#0d2460)}
+.ic-slide {background:linear-gradient(145deg,#8a2e10,#5c1d08)}
+.ic-file  {background:linear-gradient(145deg,#3a3a3c,#252527)}
+
+/* ── Info panel ──────────────────────────────── */
+.ifp{width:var(--ifw);background:var(--sb);border-left:1px solid var(--bd);flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;transition:width .2s}
+.ifp.hide{width:0;overflow:hidden}
+.ifi{padding:16px;flex:1;overflow-y:auto;min-width:var(--ifw)}
+.ifi::-webkit-scrollbar{width:0}
+.ifc-big{width:72px;height:72px;border-radius:14px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.ifc-big svg{width:34px;height:34px;color:rgba(255,255,255,.9)}
+.ithumb{width:100%;max-height:150px;object-fit:contain;border-radius:8px;margin-bottom:10px;display:block;background:var(--sf)}
+.iname{font-size:.85rem;font-weight:600;text-align:center;word-break:break-all;line-height:1.4;margin-bottom:14px}
+.idiv{height:1px;background:var(--bd);margin:10px 0}
+.irow{display:flex;justify-content:space-between;gap:8px;margin-bottom:7px}
+.ik{font-size:.7rem;color:var(--t3);flex-shrink:0}
+.iv{font-size:.7rem;color:var(--t2);text-align:right;word-break:break-all}
+.iacts{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+.iacts button{width:100%;justify-content:center;font-size:.76rem}
+.iempty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:.8rem;gap:12px;padding:20px;text-align:center}
+
+/* ── Music bar ───────────────────────────────── */
+.mb{height:var(--mbh);background:var(--mb-bg);backdrop-filter:blur(24px);border-top:1px solid var(--bd);display:none;align-items:center;padding:0 18px;gap:14px;flex-shrink:0}
+.mb.show{display:flex}
+.mart{width:42px;height:42px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.mart svg{width:20px;height:20px;color:rgba(255,255,255,.8)}
+.minfo{flex:0 0 160px;min-width:0}
+.mtit{font-size:.8rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msub{font-size:.68rem;color:var(--t3)}
+.mctl{display:flex;align-items:center;gap:7px}
+.mctl button{background:transparent;border:none;color:var(--t2);cursor:pointer;padding:3px;border-radius:5px;line-height:1;transition:color .12s}
+.mctl button:hover{color:var(--t1)}
+.mcplay{font-size:1.3rem !important}
+.mprog{flex:1;display:flex;flex-direction:column;gap:3px}
+.mseekrow{display:flex;align-items:center;gap:7px}
+.mtime{font-size:.67rem;color:var(--t3);white-space:nowrap;width:34px}
+.mtime.r{text-align:right}
+input[type=range]{-webkit-appearance:none;background:transparent;cursor:pointer;flex:1;height:14px}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--sf3)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--t1);margin-top:-4px;transition:transform .1s}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.35)}
+.mvol{display:flex;align-items:center;gap:5px;color:var(--t3)}
+.mvolsl{width:72px}
+
+/* ── Overlays ────────────────────────────────── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(5px)}
+.ov.open{display:flex}
+.modal{background:var(--sf);border:1px solid var(--bd2);border-radius:15px;padding:22px;width:90%;max-width:500px;box-shadow:0 28px 80px rgba(0,0,0,.75);max-height:88vh;overflow-y:auto}
+.modal::-webkit-scrollbar{width:0}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.mhd h2{font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:8px}
+.xcls{background:transparent;border:none;color:var(--t3);font-size:1rem;cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1}
+.xcls:hover{color:var(--t1);background:var(--sf2)}
+.mft{display:flex;gap:7px;justify-content:flex-end;margin-top:18px}
+
+/* Media modal */
+#mm .modal{max-width:min(94vw,1120px);width:auto;text-align:center}
+#mmc video{max-width:min(90vw,1080px);max-height:72vh;border-radius:8px;display:block}
+#mmc audio{width:min(400px,80vw)}
+#mmc img{max-width:min(90vw,1080px);max-height:74vh;border-radius:8px;object-fit:contain;display:block}
+.mname{font-size:.77rem;color:var(--t2);margin-top:10px}
+
+/* PDF modal */
+#pm .modal{max-width:90vw;width:min(900px,90vw);padding:16px}
+#pm iframe{width:100%;height:78vh;border:none;border-radius:6px;background:#fff}
+
+/* Upload */
+.dz{border:2px dashed var(--bd2);border-radius:10px;padding:30px;text-align:center;color:var(--t3);cursor:pointer;transition:all .18s}
+.dz svg{margin:0 auto 8px;display:block;color:var(--t3)}
+.dz:hover,.dz.ov2{border-color:var(--ac);background:rgba(10,132,255,.05);color:var(--t1)}
+.dz:hover svg,.dz.ov2 svg{color:var(--ac)}
+.ulst{margin-top:12px;max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.ulit{display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:6px;background:var(--bg);font-size:.78rem}
+.uln{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ulsz{color:var(--t3);font-size:.68rem;white-space:nowrap}
+.ulst2{font-size:.73rem}
+.pb{height:3px;background:var(--sf3);border-radius:2px;overflow:hidden;margin-top:10px}
+.pf{height:100%;background:var(--ac);transition:width .22s}
+
+/* Context menu */
+#ctx{position:fixed;background:var(--ctx-bg);backdrop-filter:blur(20px);border:1px solid var(--bd2);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.6);padding:4px;z-index:500;min-width:168px;display:none}
+.ci{display:flex;align-items:center;gap:8px;padding:6px 11px;border-radius:6px;cursor:pointer;font-size:.8rem;color:var(--t2);transition:background .1s}
+.ci:hover{background:var(--ac);color:#fff}
+.ci.danger:hover{background:var(--red)}
+.ci svg{flex-shrink:0;opacity:.8}
+.csep{height:1px;background:var(--bd);margin:3px 0}
+
+/* Tables */
+.utbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.utbl th{text-align:left;padding:6px 10px;font-size:.68rem;color:var(--t3);font-weight:600;border-bottom:1px solid var(--bd)}
+.utbl td{padding:6px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.utbl tr:last-child td{border:none}
+.rb{display:inline-block;padding:2px 7px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.03em}
+.rbsa{background:rgba(191,90,242,.18);color:#bf5af2}
+.rba{background:rgba(10,132,255,.18);color:#0a84ff}
+.rbu{background:rgba(174,174,178,.1);color:#aeaeb2}
+.logtbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.logtbl th{padding:5px 9px;text-align:left;color:var(--t3);font-size:.67rem;font-weight:600;border-bottom:1px solid var(--bd)}
+.logtbl td{padding:5px 9px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.logtbl tr:last-child td{border:none}
+.ab{display:inline-block;padding:1px 7px;border-radius:20px;font-size:.65rem;font-weight:600}
+.ab-login{background:rgba(48,209,88,.12);color:#30d158}
+.ab-login_failed{background:rgba(255,69,58,.12);color:#ff453a}
+.ab-upload{background:rgba(10,132,255,.12);color:#0a84ff}
+.ab-delete{background:rgba(255,69,58,.12);color:#ff453a}
+.ab-rename,.ab-mkdir{background:rgba(255,159,10,.12);color:#ff9f0a}
+.ab-edit{background:rgba(94,92,230,.12);color:#5e5ce6}
+.ab-x{background:var(--sf2);color:var(--t2)}
+
+/* Download bar */
+.dlbar{position:fixed;bottom:calc(var(--mbh) + 14px);left:16px;background:var(--dlbar-bg);backdrop-filter:blur(20px);border:1px solid var(--bd2);border-radius:12px;padding:10px 14px;width:300px;box-shadow:0 8px 30px rgba(0,0,0,.5);z-index:300;display:none}
+.dlbar.show{display:block}
+.dlhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.77rem;font-weight:600;color:var(--t2)}
+.dlhdr button{background:transparent;border:none;color:var(--t3);cursor:pointer;font-size:.8rem;padding:2px 5px;border-radius:4px}
+.dlhdr button:hover{color:var(--t1)}
+.dlit{margin-bottom:7px}
+.dlit:last-child{margin:0}
+.dlname{font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+.dlrow{display:flex;align-items:center;gap:7px}
+.dlpb{flex:1;height:3px;background:var(--sf3);border-radius:2px;overflow:hidden}
+.dlpf{height:100%;background:var(--ac);transition:width .25s;border-radius:2px}
+.dlpct{font-size:.67rem;color:var(--t3);white-space:nowrap;width:30px;text-align:right}
+.dlbts{display:flex;gap:3px}
+.dlb{background:transparent;border:1px solid var(--bd);color:var(--t3);padding:2px 6px;border-radius:4px;font-size:.68rem;cursor:pointer;transition:all .1s;line-height:1}
+.dlb:hover{color:var(--t1);border-color:var(--ac)}
+.dlb.ok{color:var(--grn);border-color:transparent}
+.dlb.er{color:var(--red);border-color:transparent}
+
+/* Empty / loading */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:calc(100% - 20px);color:var(--t3);gap:10px;text-align:center;padding:40px}
+.empty svg{opacity:.4}
+.ldg{display:flex;align-items:center;justify-content:center;height:180px;color:var(--t3);font-size:.82rem;gap:10px}
+.spin{width:15px;height:15px;border:2px solid var(--sf2);border-top-color:var(--ac);border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* Toast */
+#toast{position:fixed;bottom:calc(var(--mbh) + 14px);right:18px;padding:9px 16px;border-radius:9px;font-size:.8rem;z-index:600;transform:translateY(80px);transition:transform .22s;pointer-events:none;font-weight:500}
+#toast.show{transform:translateY(0)}
+#toast.ok{background:var(--toast-ok-bg);color:var(--toast-ok-c);border:1px solid var(--toast-ok-bd)}
+#toast.err{background:var(--toast-err-bg);color:var(--toast-err-c);border:1px solid var(--toast-err-bd)}
+#toast.warn{background:var(--toast-warn-bg);color:var(--toast-warn-c);border:1px solid var(--toast-warn-bd)}
+
+mark{background:rgba(10,132,255,.3);color:var(--t1);border-radius:2px;padding:0 1px}
+
+/* ── Resize handle ───────────────────────────── */
+.ifp-handle{width:5px;background:transparent;cursor:col-resize;flex-shrink:0;transition:background .15s;position:relative;z-index:2}
+.ifp-handle:hover,.ifp-handle.dragging{background:var(--ac)}
+.ifp-handle::after{content:'';position:absolute;inset:-6px 0;} /* wider hit area */
+
+/* ── Info panel toggle btn ───────────────────── */
+.inf-tog{display:flex;border:1px solid var(--bd2);border-radius:7px;overflow:hidden}
+.inf-tog button{border:none;border-radius:0;background:transparent;padding:5px 9px;color:var(--t3)}
+.inf-tog button.on{background:var(--sf2);color:var(--t1)}
+
+/* ── Sidebar overlay (mobile) ────────────────── */
+.sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:89;backdrop-filter:blur(2px)}
+.sb-ov.show{display:block}
+
+/* ── Mobile bottom nav ───────────────────────── */
+.mobnav{display:none;position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--tb-bg);backdrop-filter:blur(24px);border-top:1px solid var(--bd);z-index:100;align-items:stretch}
+.mobnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;color:var(--t3);font-size:.6rem;font-weight:500;font-family:inherit;padding:4px 2px;transition:color .12s;border-radius:0}
+.mobnav button:hover,.mobnav button.on{color:var(--ac)}
+.mobnav button svg{flex-shrink:0}
+.mob-only{display:none !important}
+
+/* ── Info bottom sheet (mobile) ──────────────── */
+.ifp-sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:148;backdrop-filter:blur(2px)}
+.ifp-sheet-bg.show{display:block}
+
+@media(max-width:768px){
+  :root{--sbw:220px;--ifw:0px;--mbh:0px}
+  .sb{position:fixed;top:0;left:0;bottom:56px;z-index:90;transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);border-right:1px solid var(--bd2)}
+  .sb.open{transform:translateX(0)}
+  .ifp,.ifp-handle{display:none !important}
+  .mobnav{display:flex}
+  .mob-only{display:flex !important}
+  .tbr .vtog,.tbr .vsep,.tbr > .bg{display:none}
+  .tb{padding:0 10px}
+  .pbar{max-width:calc(100vw - 160px)}
+  .bcseg{max-width:100px}
+  .fgrid{grid-template-columns:repeat(auto-fill,minmax(88px,1fr))}
+  .lhdr .frdt,.fr .frdt,.lhdr .frk,.fr .frk{display:none}
+  .lhdr{grid-template-columns:20px 1fr 68px}
+  .fr{grid-template-columns:20px 1fr 68px;padding:8px 10px;min-height:44px}
+  .fa{padding:10px}
+  .dlbar{left:8px;right:8px;width:auto}
+  #toast{bottom:70px}
+  /* Info bottom sheet */
+  .ifp-mob{display:flex;flex-direction:column;position:fixed;bottom:56px;left:0;right:0;height:65vh;background:var(--sb);border-top:1px solid var(--bd);border-radius:16px 16px 0 0;z-index:149;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow:hidden}
+  .ifp-mob.open{transform:translateY(0)}
+  .ifp-mob .ifi{padding:16px;overflow-y:auto;flex:1}
+  .ifp-mob-handle{width:36px;height:4px;background:var(--sf3);border-radius:2px;margin:10px auto 2px;flex-shrink:0;cursor:pointer}
+}
+@media(min-width:769px){
+  .ifp-mob,.ifp-sheet-bg{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lcard">
+    <div class="brand">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+      <h1>Home NAS</h1>
+      <p>Sign in to access your files</p>
+    </div>
+    <div class="lerr" id="lerr"></div>
+    <label>Username</label>
+    <input id="lu" type="text" placeholder="admin" autocomplete="username">
+    <label>Password</label>
+    <input id="lp" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button class="bp bblk" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Titlebar -->
+  <div class="tb">
+    <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+    <button class="bi mob-only" onclick="toggleSidebar()" title="Menu" style="margin-left:4px">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="vsep"></div>
+    <div class="nav">
+      <button id="btnBack" onclick="goBack()" disabled title="Back">‹</button>
+      <button id="btnFwd"  onclick="goFwd()"  disabled title="Forward">›</button>
+    </div>
+    <div class="vsep"></div>
+    <div class="pbar" id="pbar"></div>
+    <div class="tbr">
+      <div class="vtog">
+        <button id="vg" class="on" onclick="setView('grid')" title="Icon view">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        </button>
+        <button id="vl" onclick="setView('list')" title="List view">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="7" width="14" height="2" rx="1"/><rect x="1" y="12" width="14" height="2" rx="1"/></svg>
+        </button>
+      </div>
+      <div class="vsep"></div>
+      <button class="bg sm" onclick="openUpload()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload
+      </button>
+      <button class="bg sm" onclick="openMkdir()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+        New Folder
+      </button>
+      <div class="vsep"></div>
+      <button class="bi" id="thbtn" onclick="toggleTheme()" title="Toggle theme">
+        <svg id="th-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg id="th-sun"  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <div class="inf-tog">
+        <button id="infotog" onclick="toggleInfoPanel()" title="Toggle info panel" class="on">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        </button>
+      </div>
+      <div class="vsep"></div>
+      <div class="uchip" onclick="openAcct()">
+        <div class="av" id="av"></div>
+        <span id="uname" style="font-size:.78rem"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sb-ov" id="sbov" onclick="closeSidebar()"></div>
+
+  <!-- Content -->
+  <div class="cnt">
+    <!-- Sidebar -->
+    <div class="sb" id="sidebar">
+      <div class="sbl">Favorites</div>
+      <div class="sbi" onclick="goFav('')"          id="fav-0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</div>
+      <div class="sbi" onclick="goFav('Desktop')"  ><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Desktop</div>
+      <div class="sbi" onclick="goFav('Documents')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Documents</div>
+      <div class="sbi" onclick="goFav('Downloads')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Downloads</div>
+      <div class="sbi" onclick="goFav('Movies')"   ><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg>Movies</div>
+      <div class="sbi" onclick="goFav('Music')"    ><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Music</div>
+      <div class="sbi" onclick="goFav('Pictures')" ><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Pictures</div>
+      <div class="sbdiv"></div>
+      <div class="sbl">Locations</div>
+      <div id="sbroots"></div>
+    </div>
+
+    <!-- Main -->
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+      <div class="tool">
+        <div class="swrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="si" type="text" placeholder="Search…" oninput="onSearch(this.value)" autocomplete="off">
+          <button class="sscope" id="sscope" onclick="toggleScope()" title="Folder only">Folder</button>
+        </div>
+        <span class="tinfo" id="tinfo"></span>
+      </div>
+      <div class="fa" id="fa"></div>
+    </div>
+
+    <!-- Resize handle -->
+    <div class="ifp-handle" id="ifph"></div>
+
+    <!-- Info panel -->
+    <div class="ifp" id="ifp">
+      <div class="ifi" id="ifi">
+        <div class="iempty">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span>Select an item</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Music bar -->
+  <div class="mb" id="mb">
+    <div class="mart ic-audio" id="mart">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    </div>
+    <div class="minfo"><div class="mtit" id="mtit">—</div><div class="msub" id="msub"></div></div>
+    <div class="mctl">
+      <button onclick="prevTrk()" title="Previous"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 20 9 12l10-8v16z"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <button class="mcplay" id="mcplay" onclick="togglePlay()"><svg id="ic-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg><svg id="ic-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button>
+      <button onclick="nextTrk()" title="Next"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4l10 8-10 8V4z"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="mprog">
+      <div class="mseekrow">
+        <span class="mtime" id="mtcur">0:00</span>
+        <input type="range" id="seek" min="0" max="100" value="0" oninput="seekTo(this.value)">
+        <span class="mtime r" id="mtdur">0:00</span>
+      </div>
+    </div>
+    <div class="mvol">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      <input type="range" class="mvolsl" id="vol" min="0" max="1" step="0.02" value="0.8" oninput="setVol(this.value)">
+    </div>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobnav" id="mobnav">
+    <button onclick="toggleSidebar()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <span>Files</span>
+    </button>
+    <button onclick="focusSearch()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>Search</span>
+    </button>
+    <button onclick="openUpload()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Upload</span>
+    </button>
+    <button id="mobnav-info" onclick="toggleInfoSheet()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Info</span>
+    </button>
+    <button onclick="openAcct()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Account</span>
+    </button>
+  </nav>
+</div>
+
+<!-- MOBILE INFO SHEET BG -->
+<div class="ifp-sheet-bg" id="ifpsbg" onclick="closeInfoSheet()"></div>
+<!-- MOBILE INFO SHEET -->
+<div class="ifp-mob" id="ifpmob">
+  <div class="ifp-mob-handle" onclick="closeInfoSheet()"></div>
+  <div class="ifi" id="ifi-mob">
+    <div class="iempty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Select an item</span></div>
+  </div>
+</div>
+
+<!-- MEDIA MODAL -->
+<div class="ov" id="mm" onclick="if(event.target===this)closeMM()">
+  <div class="modal"><div class="mhd"><h2 id="mmhdr" style="font-size:.82rem;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></h2><button class="xcls" onclick="closeMM()">✕</button></div>
+    <div id="mmc"></div><div class="mname" id="mmsub"></div>
+  </div>
+</div>
+
+<!-- PDF MODAL -->
+<div class="ov" id="pm" onclick="if(event.target===this)closePDF()">
+  <div class="modal"><div class="mhd"><h2 id="pmhdr" style="font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90%"></h2><div style="display:flex;gap:6px"><button class="bg xs" onclick="dlCurrent()">Download</button><button class="xcls" onclick="closePDF()">✕</button></div></div>
+    <iframe id="pmiframe" src="" title="PDF Viewer"></iframe>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="ov" id="um">
+  <div class="modal"><div class="mhd"><h2><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Files</h2><button class="xcls" onclick="closeUpload()">✕</button></div>
+    <div class="dz" id="dz" onclick="$('fi').click()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <div style="font-size:.82rem">Drop files here or click to browse</div>
+    </div>
+    <input type="file" id="fi" multiple style="display:none" onchange="addFiles([...this.files])">
+    <div class="ulst" id="ulst"></div>
+    <div class="pb" id="pb" style="display:none"><div class="pf" id="pf" style="width:0%"></div></div>
+    <div class="mft"><button class="bg" onclick="closeUpload()">Cancel</button><button class="bp" id="ubtn" onclick="doUpload()">Upload</button></div>
+  </div>
+</div>
+
+<!-- MKDIR MODAL -->
+<div class="ov" id="mkm" onclick="if(event.target===this)closeMkdir()">
+  <div class="modal"><div class="mhd"><h2><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>New Folder</h2><button class="xcls" onclick="closeMkdir()">✕</button></div>
+    <label>Folder Name</label><input id="fn" type="text" placeholder="Untitled Folder" style="margin-bottom:0">
+    <div class="mft"><button class="bg" onclick="closeMkdir()">Cancel</button><button class="bp" onclick="doMkdir()">Create</button></div>
+  </div>
+</div>
+
+<!-- RENAME MODAL -->
+<div class="ov" id="rnm" onclick="if(event.target===this)closeRename()">
+  <div class="modal"><div class="mhd"><h2>Rename</h2><button class="xcls" onclick="closeRename()">✕</button></div>
+    <label>New Name</label><input id="rn" type="text" style="margin-bottom:0">
+    <div class="mft"><button class="bg" onclick="closeRename()">Cancel</button><button class="bp" onclick="doRename()">Rename</button></div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="ov" id="delm" onclick="if(event.target===this)closeDel()">
+  <div class="modal"><div class="mhd"><h2>Delete Item</h2><button class="xcls" onclick="closeDel()">✕</button></div>
+    <p id="delmsg" style="color:var(--t2);font-size:.83rem;line-height:1.6"></p>
+    <div class="mft"><button class="bg" onclick="closeDel()">Cancel</button><button class="bd2" onclick="confirmDel()">Delete</button></div>
+  </div>
+</div>
+
+<!-- EDITOR MODAL -->
+<div class="ov" id="edm" onclick="if(event.target===this)closeEdit()">
+  <div class="modal" style="max-width:780px;width:90vw"><div class="mhd"><h2 id="edhdr" style="font-size:.82rem"></h2><div style="display:flex;gap:6px;align-items:center"><span id="edinfo" style="font-size:.7rem;color:var(--t3)"></span><button class="xcls" onclick="closeEdit()">✕</button></div></div>
+    <textarea id="edta" spellcheck="false" placeholder="Loading…"></textarea>
+    <div class="mft"><button class="bg" onclick="closeEdit()">Cancel</button><button class="bp" onclick="saveEdit()">Save — ⌘S</button></div>
+  </div>
+</div>
+
+<!-- ACCOUNT MODAL -->
+<div class="ov" id="acctm" onclick="if(event.target===this)closeAcct()">
+  <div class="modal" style="max-width:600px"><div class="mhd"><h2>Account & Settings</h2><button class="xcls" onclick="closeAcct()">✕</button></div>
+    <div id="acctb"></div>
+  </div>
+</div>
+
+<!-- LOGS MODAL -->
+<div class="ov" id="logsm" onclick="if(event.target===this)closeLogs()">
+  <div class="modal" style="max-width:820px;width:92vw"><div class="mhd"><h2>Activity Log</h2><button class="xcls" onclick="closeLogs()">✕</button></div>
+    <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap">
+      <input id="lfu" type="text" placeholder="Filter user…" style="flex:1;min-width:110px;margin-bottom:0">
+      <select id="lfa" style="flex:1;min-width:110px;margin-bottom:0"><option value="">All actions</option><option>login</option><option>login_failed</option><option>upload</option><option>delete</option><option>rename</option><option>mkdir</option><option>edit</option></select>
+      <button class="bg sm" onclick="loadLogs()">Filter</button>
+    </div>
+    <div id="logb" style="max-height:380px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- ROOTS MODAL -->
+<div class="ov" id="rtm" onclick="if(event.target===this)closeRoots()">
+  <div class="modal" style="max-width:620px"><div class="mhd"><h2>Manage Roots</h2><button class="xcls" onclick="closeRoots()">✕</button></div>
+    <div id="rtb"></div>
+    <div class="mft"><button class="bg" onclick="closeRoots()">Close</button></div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx">
+  <div class="ci" id="ctx-open"  onclick="cxOpen()">  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Quick Look</div>
+  <div class="ci" id="ctx-play"  onclick="cxPlay()">  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Play</div>
+  <div class="ci" id="ctx-pdf"   onclick="cxPDF()">   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>View PDF</div>
+  <div class="ci" id="ctx-edit"  onclick="cxEdit()">  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</div>
+  <div class="csep"></div>
+  <div class="ci"               onclick="cxDL()">    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</div>
+  <div class="ci"               onclick="cxRename()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>Rename</div>
+  <div class="csep"></div>
+  <div class="ci danger"        onclick="cxDel()">   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</div>
+</div>
+
+<!-- DOWNLOAD BAR -->
+<div class="dlbar" id="dlbar">
+  <div class="dlhdr"><span>Downloads</span><button onclick="$('dlbar').classList.remove('show')">✕</button></div>
+  <div id="dllist"></div>
+</div>
+
+<div id="toast"></div>
+<audio id="aud" style="display:none"></audio>
+
+<script>
+'use strict';
+// ── Icons ─────────────────────────────────────────────────────────
+const SVG = {
+  folder:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+  video: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><polygon points="17 9 22 6 22 18 17 15"/></svg>`,
+  audio: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+  image: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+  pdf:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+  code:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+  text:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`,
+  zip:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  sheet: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>`,
+  doc:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+  slide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+  file:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+};
+
+function ikey(item){
+  if(item.is_dir) return 'folder';
+  const m=item.mime||'';
+  if(m.startsWith('video/'))  return 'video';
+  if(m.startsWith('audio/'))  return 'audio';
+  if(m.startsWith('image/'))  return 'image';
+  if(m.includes('pdf'))       return 'pdf';
+  if(m.startsWith('text/x-')||/json|javascript|xml|yaml|toml|sql/.test(m)) return 'code';
+  if(m.startsWith('text/'))   return 'text';
+  if(/zip|tar|gz|rar|7z|bz2|xz|compressed|archive/.test(m)) return 'zip';
+  if(/spreadsheet|excel|csv/.test(m)) return 'sheet';
+  if(/word|document/.test(m)) return 'doc';
+  if(/presentation|powerpoint/.test(m)) return 'slide';
+  return 'file';
+}
+function icls(item){ return `ic-${ikey(item)}`; }
+function isvg(item){ return SVG[ikey(item)]||SVG.file; }
+function ikind(item){
+  if(item.is_dir) return 'Folder';
+  const m=item.mime||'';
+  if(m.startsWith('video/'))  return 'Video';
+  if(m.startsWith('audio/'))  return 'Audio';
+  if(m.startsWith('image/'))  return 'Image';
+  if(m.includes('pdf'))       return 'PDF Document';
+  if(/javascript/.test(m))    return 'JavaScript';
+  if(/json/.test(m))          return 'JSON';
+  if(m.startsWith('text/'))   return 'Text';
+  if(/zip|tar|archive/.test(m)) return 'Archive';
+  return (item.ext||'').toUpperCase().replace('.','') + ' File' || 'File';
+}
+function isPDF(item){ return (item.mime||'').includes('pdf'); }
+function isStreamable(item){ const m=item.mime||''; return m.startsWith('video/')||m.startsWith('audio/')||m.startsWith('image/'); }
+
+// ── State ─────────────────────────────────────────────────────────
+const S={
+  tok:localStorage.getItem('nas_tok'), me:null, roots:[], rid:null, path:'',
+  hist:[], hi:-1, files:[], sel:null, cx:null,
+  view:localStorage.getItem('nas_view')||'grid',
+  searchQ:'', searchWide:false,
+  pendDel:null, pendRen:null, editPath:null, curPDFitem:null,
+  selFiles:[], queue:[], qi:-1,
+};
+const aud=$('aud');
+aud.volume=parseFloat(localStorage.getItem('nas_vol')||'0.8');
+$('vol').value=aud.volume;
+
+// ── API ───────────────────────────────────────────────────────────
+async function api(method,url,body,isForm){
+  const h={};
+  if(S.tok) h['Authorization']=`Bearer ${S.tok}`;
+  if(!isForm&&body) h['Content-Type']='application/json';
+  const r=await fetch(url,{method,headers:h,body:body?(isForm?body:JSON.stringify(body)):undefined});
+  if(r.status===401){logout();return null;}
+  const ct=r.headers.get('content-type')||'';
+  const d=ct.includes('application/json')?await r.json():r;
+  if(!r.ok) throw new Error(d?.detail||'Request failed');
+  return d;
+}
+
+// ── Auth ──────────────────────────────────────────────────────────
+async function doLogin(){
+  const username=$('lu').value.trim(), password=$('lp').value;
+  const err=$('lerr'); err.style.display='none';
+  try{
+    const d=await api('POST','/api/auth/login',{username,password});
+    if(!d) return;
+    S.tok=d.access_token; S.me={username:d.username,role:d.role,allowed_roots:d.allowed_roots||[]};
+    localStorage.setItem('nas_tok',S.tok);
+    showApp();
+  }catch(e){ err.textContent=e.message; err.style.display='block'; }
+}
+function logout(){
+  S.tok=null;S.me=null;localStorage.removeItem('nas_tok');
+  $('login').classList.add('show');$('app').classList.remove('show');aud.pause();
+}
+async function checkAuth(){
+  if(!S.tok) return false;
+  try{ const d=await api('GET','/api/auth/me'); if(!d)return false; S.me=d; return true; }
+  catch{return false;}
+}
+
+// ── Navigation ────────────────────────────────────────────────────
+async function go(rid,path,push=true){
+  if(push){S.hist=S.hist.slice(0,S.hi+1);S.hist.push({rid,path});S.hi=S.hist.length-1;}
+  S.rid=rid;S.path=path;S.sel=null;
+  updateNavBtns();renderBC();updateIP(null);
+  await loadFiles();
+}
+function goBack(){if(S.hi>0){S.hi--;const h=S.hist[S.hi];go(h.rid,h.path,false);}}
+function goFwd() {if(S.hi<S.hist.length-1){S.hi++;const h=S.hist[S.hi];go(h.rid,h.path,false);}}
+async function goFav(sub){
+  if(!S.rid&&S.roots.length) S.rid=S.roots[0].id;
+  if(!S.rid) return;
+  await go(S.rid,sub);
+}
+function updateNavBtns(){$('btnBack').disabled=S.hi<=0;$('btnFwd').disabled=S.hi>=S.hist.length-1;}
+
+function renderBC(){
+  const pb=$('pbar'); pb.innerHTML='';
+  if(!S.rid) return;
+  const root=S.roots.find(r=>r.id===S.rid);
+  const rEl=document.createElement('div'); rEl.className='bc-rt';
+  rEl.innerHTML=`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>${eH(root?.label||S.rid)}`;
+  rEl.onclick=()=>go(S.rid,'');
+  pb.appendChild(rEl);
+  if(S.path){
+    S.path.split('/').filter(Boolean).forEach((seg,i,arr)=>{
+      const sep=document.createElement('span'); sep.className='bcsep'; sep.textContent='›'; pb.appendChild(sep);
+      const s=document.createElement('div');
+      s.className='bcseg'+(i===arr.length-1?' last':'');
+      s.textContent=seg;
+      const tp=arr.slice(0,i+1).join('/');
+      s.onclick=()=>go(S.rid,tp);
+      pb.appendChild(s);
+    });
+  }
+}
+
+// ── File loading ──────────────────────────────────────────────────
+async function loadFiles(){
+  const fa=$('fa');
+  fa.innerHTML='<div class="ldg"><div class="spin"></div> Loading…</div>';
+  try{
+    const url=S.path?`/api/files/${S.rid}/${S.path}`:`/api/files/${S.rid}`;
+    const d=await api('GET',url); if(!d) return;
+    S.files=d.items||[];
+    S.files.sort((a,b)=>{ if(a.is_dir!==b.is_dir) return a.is_dir?-1:1; return a.name.toLowerCase()<b.name.toLowerCase()?-1:1; });
+    S.queue=S.files.filter(f=>f.mime&&f.mime.startsWith('audio/')).map(f=>({rid:S.rid,path:f.path,name:f.name,mime:f.mime}));
+    $('si').value=''; S.searchQ=''; S.searchWide=false; updateScopeBtn();
+    $('tinfo').textContent=`${S.files.length} item${S.files.length!==1?'s':''}`;
+    renderFiles(); updateSBActive();
+  }catch(e){
+    fa.innerHTML=`<div class="empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span>${eH(e.message)}</span></div>`;
+  }
+}
+async function refresh(){await loadFiles();}
+
+// ── Search ────────────────────────────────────────────────────────
+function fuzzy(str,q){
+  str=str.toLowerCase();q=q.toLowerCase();
+  let si=0,score=0,cons=0;
+  for(const ch of q){const f=str.indexOf(ch,si);if(f<0)return 0;cons=f===si?cons+1:0;score+=1+cons*2-f*.01;si=f+1;}
+  return score;
+}
+function hl(name,q){
+  if(!q) return eH(name);
+  const low=name.toLowerCase(); let res='',si=0;
+  for(const ch of q.toLowerCase()){const f=low.indexOf(ch,si);if(f<0)return eH(name);res+=eH(name.slice(si,f))+`<mark>${eH(name[f])}</mark>`;si=f+1;}
+  return res+eH(name.slice(si));
+}
+function onSearch(q){
+  S.searchQ=q.trim();
+  if(S.searchWide&&S.searchQ){doWideSearch();return;}
+  renderFiles();
+  const m=S.searchQ?S.files.filter(f=>fuzzy(f.name,S.searchQ)>0).length:S.files.length;
+  $('tinfo').textContent=S.searchQ?`${m} match${m!==1?'es':''} of ${S.files.length}`:`${S.files.length} item${S.files.length!==1?'s':''}`;
+}
+function updateScopeBtn(){const b=$('sscope');b.classList.remove('wide');b.textContent='Folder';}
+function toggleScope(){
+  S.searchWide=!S.searchWide;
+  const b=$('sscope'); b.classList.toggle('wide',S.searchWide); b.textContent=S.searchWide?'Root':'Folder';
+  if(S.searchQ) onSearch(S.searchQ);
+}
+async function doWideSearch(){
+  const q=S.searchQ; if(!q||q.length<2){renderFiles();return;}
+  $('fa').innerHTML='<div class="ldg"><div class="spin"></div> Searching root…</div>';
+  const results=[];
+  await _walk(S.rid,'',q,results,0);
+  $('tinfo').textContent=`${results.length} result${results.length!==1?'s':''} found`;
+  if(!results.length){$('fa').innerHTML='<div class="empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span>No matches found</span></div>';return;}
+  renderFileList($('fa'),results,q);
+}
+async function _walk(rid,path,q,out,depth){
+  if(depth>5) return;
+  try{
+    const url=path?`/api/files/${rid}/${path}`:`/api/files/${rid}`;
+    const d=await api('GET',url); if(!d||!d.items) return;
+    for(const item of d.items){
+      if(fuzzy(item.name,q)>0) out.push(item);
+      if(item.is_dir) await _walk(rid,item.path,q,out,depth+1);
+    }
+  }catch{}
+}
+
+// ── Render ────────────────────────────────────────────────────────
+function renderFiles(){
+  let items=S.files;
+  if(S.searchQ&&!S.searchWide){
+    const q=S.searchQ;
+    items=S.files.map(f=>({item:f,score:fuzzy(f.name,q)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.item);
+  }
+  const fa=$('fa');
+  if(!items.length){
+    fa.innerHTML=S.searchQ
+      ?'<div class="empty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span>No matches</span></div>'
+      :'<div class="empty"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Empty folder</span></div>';
+    return;
+  }
+  if(S.view==='grid') renderGrid(fa,items);
+  else renderFileList(fa,items,S.searchQ);
+}
+
+function renderGrid(fa,items){
+  const g=document.createElement('div'); g.className='fgrid';
+  for(const item of items){
+    const c=document.createElement('div'); c.className='fc'; c._item=item;
+    c.innerHTML=`<div class="fci ${icls(item)}">${isvg(item)}</div><div class="fcn" title="${eA(item.name)}">${eH(item.name)}</div><div class="fcm">${item.is_dir?'Folder':fmtSz(item.size)}</div>`;
+    c.onclick=e=>onCardClick(e,item,c);
+    c.oncontextmenu=e=>showCtx(e,item);
+    g.appendChild(c);
+  }
+  fa.innerHTML=''; fa.appendChild(g);
+}
+
+function renderFileList(fa,items,q){
+  const wrap=document.createElement('div');
+  wrap.innerHTML=`<div class="lhdr"><span></span><span>Name</span><span style="text-align:right">Size</span><span style="text-align:right">Modified</span><span>Kind</span></div>`;
+  const lst=document.createElement('div'); lst.className='flst';
+  for(const item of items){
+    const r=document.createElement('div'); r.className='fr'; r._item=item;
+    r.innerHTML=`<div class="fci ${icls(item)}">${isvg(item)}</div>
+      <div class="frn">${q?hl(item.name,q):eH(item.name)}${q&&item.path?` <span style="color:var(--t3);font-size:.68rem"> — ${eH(item.path)}</span>`:''}</div>
+      <div class="frsz">${item.is_dir?'—':fmtSz(item.size)}</div>
+      <div class="frdt">${fmtDt(item.modified)}</div>
+      <div class="frk">${ikind(item)}</div>`;
+    r.onclick=e=>onCardClick(e,item,r);
+    r.oncontextmenu=e=>showCtx(e,item);
+    lst.appendChild(r);
+  }
+  wrap.appendChild(lst); fa.innerHTML=''; fa.appendChild(wrap);
+}
+
+function onCardClick(e,item,el2){
+  if(e.target.closest('.ci')) return;
+  document.querySelectorAll('.fc.sel,.fr.sel').forEach(c=>c.classList.remove('sel'));
+  el2.classList.add('sel'); S.sel=item; updateIP(item);
+  if(item.is_dir){ go(S.rid,item.path); return; }
+  // On mobile, auto-open info sheet when a file is selected
+  if(window.innerWidth<=768) toggleInfoSheet();
+}
+
+// ── View ──────────────────────────────────────────────────────────
+function setView(v){
+  S.view=v; localStorage.setItem('nas_view',v);
+  $('vg').classList.toggle('on',v==='grid');
+  $('vl').classList.toggle('on',v==='list');
+  renderFiles();
+}
+
+// ── Sidebar ───────────────────────────────────────────────────────
+function renderSidebar(){
+  const el2=$('sbroots'); el2.innerHTML='';
+  for(const r of S.roots){
+    const d=document.createElement('div'); d.className='sbi'; d.id=`sbr-${r.id}`;
+    d.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>${eH(r.label)}`;
+    d.onclick=()=>go(r.id,'');
+    el2.appendChild(d);
+  }
+}
+function updateSBActive(){
+  document.querySelectorAll('.sbi').forEach(i=>i.classList.remove('on'));
+  const el2=$(`sbr-${S.rid}`); if(el2) el2.classList.add('on');
+}
+
+// ── Info panel ────────────────────────────────────────────────────
+function updateIP(item){
+  const inner=$('ifi');
+  const mobInner=$('ifi-mob');
+  if(!item){const emp='<div class="iempty"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" style="opacity:.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Select an item</span></div>';inner.innerHTML=emp;if(mobInner)mobInner.innerHTML=emp;return;}
+  const src=streamURL(item);
+  let thumb='';
+  if(item.mime&&item.mime.startsWith('image/')) thumb=`<img class="ithumb" src="${src}" alt="${eA(item.name)}" onerror="this.style.display='none'">`;
+  const acts=[];
+  if(item.is_dir){ acts.push(`<button class="bg sm" onclick="go('${S.rid}','${esc(item.path)}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Open</button>`); }
+  else {
+    if(item.mime&&item.mime.startsWith('video/')) acts.push(`<button class="bp sm" onclick="openMM(S.sel)">Play Video</button>`);
+    if(item.mime&&item.mime.startsWith('audio/')) acts.push(`<button class="bp sm" onclick="playAudio(S.sel)">Play Audio</button>`);
+    if(isPDF(item)) acts.push(`<button class="bp sm" onclick="openPDF(S.sel)">View PDF</button>`);
+    if(item.editable) acts.push(`<button class="bg sm" onclick="openEdit(S.sel)">Edit</button>`);
+    acts.push(`<button class="bg sm" onclick="dlFile(S.sel)">Download</button>`);
+  }
+  acts.push(`<button class="bg sm" onclick="openRename(S.sel)">Rename</button>`);
+  acts.push(`<button class="bd2 sm" onclick="askDel(S.sel)">Delete</button>`);
+  inner.innerHTML=`
+    ${thumb}<div class="ifc-big ${thumb?'':'ic-'+ikey(item)}" style="${thumb?'display:none':'margin:0 auto 12px'}">${isvg(item)}</div>
+    <div class="iname">${eH(item.name)}</div>
+    <div class="idiv"></div>
+    <div class="irow"><span class="ik">Kind</span><span class="iv">${ikind(item)}</span></div>
+    ${item.size!=null?`<div class="irow"><span class="ik">Size</span><span class="iv">${fmtSz(item.size)}</span></div>`:''}
+    <div class="irow"><span class="ik">Modified</span><span class="iv">${fmtDt(item.modified)}</span></div>
+    ${item.path?`<div class="irow"><span class="ik">Path</span><span class="iv" style="font-family:'SF Mono',monospace;font-size:.65rem">${eH(item.path)}</span></div>`:''}
+    <div class="idiv"></div>
+    <div class="iacts">${acts.join('')}</div>`;
+  if(mobInner) mobInner.innerHTML=inner.innerHTML;
+}
+
+// ── Context menu ──────────────────────────────────────────────────
+function showCtx(e,item){
+  e.preventDefault(); e.stopPropagation(); S.cx=item;
+  $('ctx-open').style.display=item.is_dir?'none':'';
+  $('ctx-play').style.display=(item.mime&&(item.mime.startsWith('video/')||item.mime.startsWith('audio/')))?'':'none';
+  $('ctx-pdf').style.display=isPDF(item)?'':'none';
+  $('ctx-edit').style.display=item.editable?'':'none';
+  const ctx=$('ctx');
+  ctx.style.display='block';
+  ctx.style.left=Math.min(e.clientX,window.innerWidth-180)+'px';
+  ctx.style.top=Math.min(e.clientY,window.innerHeight-220)+'px';
+}
+function hideCtx(){$('ctx').style.display='none';}
+function cxOpen()  {if(S.cx){if(S.cx.is_dir)go(S.rid,S.cx.path);else if(isPDF(S.cx))openPDF(S.cx);else if(isStreamable(S.cx))openMM(S.cx);else dlFile(S.cx);}hideCtx();}
+function cxPlay()  {if(S.cx){if(S.cx.mime&&S.cx.mime.startsWith('audio/'))playAudio(S.cx);else openMM(S.cx);}hideCtx();}
+function cxPDF()   {if(S.cx)openPDF(S.cx);hideCtx();}
+function cxEdit()  {if(S.cx)openEdit(S.cx);hideCtx();}
+function cxDL()    {if(S.cx)dlFile(S.cx);hideCtx();}
+function cxRename(){if(S.cx||S.sel)openRename(S.cx||S.sel);hideCtx();}
+function cxDel()   {if(S.cx||S.sel)askDel(S.cx||S.sel);hideCtx();}
+
+// ── Media modal ───────────────────────────────────────────────────
+function openMM(item){
+  const src=streamURL(item); const mc=$('mmc'); const m=item.mime||'';
+  if(m.startsWith('image/'))      mc.innerHTML=`<img src="${src}" alt="${eA(item.name)}">`;
+  else if(m.startsWith('video/')) mc.innerHTML=`<video controls autoplay src="${src}"></video>`;
+  else                            mc.innerHTML=`<audio controls autoplay src="${src}"></audio>`;
+  $('mmhdr').textContent=item.name; $('mmsub').textContent=ikind(item);
+  open_('mm');
+}
+function closeMM(){
+  const mc=$('mmc'); const m=mc.querySelector('video,audio');
+  if(m){m.pause();m.src='';}mc.innerHTML='';close_('mm');
+}
+
+// ── PDF viewer ────────────────────────────────────────────────────
+function openPDF(item){
+  S.curPDFitem=item;
+  const src=streamURL(item);
+  $('pmhdr').textContent=item.name;
+  $('pmiframe').src=src;
+  open_('pm');
+}
+function closePDF(){$('pmiframe').src='';S.curPDFitem=null;close_('pm');}
+function dlCurrent(){if(S.curPDFitem)dlFile(S.curPDFitem);}
+
+// ── Audio player ──────────────────────────────────────────────────
+function playAudio(item){
+  const idx=S.queue.findIndex(q=>q.path===item.path&&q.rid===S.rid);
+  if(idx>=0) S.qi=idx; else{S.queue.unshift({rid:S.rid,path:item.path,name:item.name,mime:item.mime});S.qi=0;}
+  loadTrk(S.qi);
+}
+function loadTrk(idx){
+  if(idx<0||idx>=S.queue.length) return;
+  S.qi=idx;const q=S.queue[idx];
+  aud.src=`/api/stream/${q.rid}/${q.path}?token=${encodeURIComponent(S.tok)}`;
+  aud.play().catch(()=>{});
+  $('mtit').textContent=q.name;$('msub').textContent='';
+  $('mb').classList.add('show');
+  setPlyIcon(true);
+}
+function prevTrk(){loadTrk(S.qi>0?S.qi-1:S.queue.length-1);}
+function nextTrk(){loadTrk(S.qi<S.queue.length-1?S.qi+1:0);}
+function togglePlay(){if(aud.paused){aud.play();setPlyIcon(true);}else{aud.pause();setPlyIcon(false);}}
+function setPlyIcon(playing){$('ic-play').style.display=playing?'none':'block';$('ic-pause').style.display=playing?'block':'none';}
+function seekTo(v){if(aud.duration)aud.currentTime=(v/100)*aud.duration;}
+function setVol(v){aud.volume=v;localStorage.setItem('nas_vol',v);}
+aud.addEventListener('timeupdate',()=>{if(aud.duration)$('seek').value=(aud.currentTime/aud.duration)*100;$('mtcur').textContent=fmtT(aud.currentTime);});
+aud.addEventListener('loadedmetadata',()=>{$('mtdur').textContent=fmtT(aud.duration);});
+aud.addEventListener('ended',nextTrk);
+aud.addEventListener('pause',()=>setPlyIcon(false));
+aud.addEventListener('play', ()=>setPlyIcon(true));
+
+// ── Download manager ──────────────────────────────────────────────
+const DL={}; let dlSeq=0;
+async function dlFile(item){
+  const id=++dlSeq;
+  const url=streamURL(item);
+  DL[id]={ctl:new AbortController(),paused:false,rx:0,total:0,chunks:[],name:item.name,url};
+  renderDLBar();
+  await _dlRun(id);
+}
+async function _dlRun(id){
+  const d=DL[id]; if(!d||d.paused) return;
+  try{
+    const res=await fetch(d.url,{signal:d.ctl.signal,headers:{'Authorization':`Bearer ${S.tok}`,...(d.rx?{'Range':`bytes=${d.rx}-`}:{})}});
+    d.total=d.total||parseInt(res.headers.get('content-length')||'0');
+    const reader=res.body.getReader();
+    while(true){
+      if(d.paused){reader.cancel();return;}
+      const{done,value}=await reader.read();
+      if(done) break;
+      d.chunks.push(value);d.rx+=value.length;updateDLItem(id);
+    }
+    const blob=new Blob(d.chunks);
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=d.name;a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),8000);
+    d.done=true;updateDLItem(id);
+    setTimeout(()=>{delete DL[id];renderDLBar();},4000);
+  }catch(e){if(e.name!=='AbortError'){d.error=e.message;updateDLItem(id);}}
+}
+function pauseDL(id){
+  const d=DL[id];if(!d||d.done)return;
+  d.paused=!d.paused;d.ctl.abort();d.ctl=new AbortController();
+  if(!d.paused)_dlRun(id);updateDLItem(id);
+}
+function cancelDL(id){const d=DL[id];if(d)d.ctl.abort();delete DL[id];renderDLBar();}
+function renderDLBar(){
+  const keys=Object.keys(DL),bar=$('dlbar');
+  if(!keys.length){bar.classList.remove('show');return;}
+  bar.classList.add('show');
+  $('dllist').innerHTML=keys.map(id=>{const d=DL[id];const pct=d.total?Math.round((d.rx/d.total)*100):0;
+  return`<div class="dlit" id="dli${id}"><div class="dlname">${eH(d.name)}</div><div class="dlrow"><div class="dlpb"><div class="dlpf" style="width:${d.done?100:pct}%"></div></div><span class="dlpct">${d.done?'100':pct}%</span><div class="dlbts">
+    ${!d.done&&!d.error?`<button class="dlb" onclick="pauseDL(${id})">${d.paused?'▶':'⏸'}</button>`:''}
+    ${!d.done&&!d.error?`<button class="dlb" onclick="cancelDL(${id})">✕</button>`:''}
+    ${d.done?'<span class="dlb ok">✓</span>':''}${d.error?`<span class="dlb er" title="${eA(d.error)}">✗</span>`:''}
+  </div></div></div>`; }).join('');
+}
+function updateDLItem(id){const d=DL[id];if(!d)return;const el2=$(`dli${id}`);if(!el2){renderDLBar();return;}const pct=d.total?Math.round((d.rx/d.total)*100):0;const f=el2.querySelector('.dlpf');const p=el2.querySelector('.dlpct');if(f)f.style.width=(d.done?100:pct)+'%';if(p)p.textContent=(d.done?100:pct)+'%';el2.querySelector('.dlbts').innerHTML=`${!d.done&&!d.error?`<button class="dlb" onclick="pauseDL(${id})">${d.paused?'▶':'⏸'}</button>`:''} ${!d.done&&!d.error?`<button class="dlb" onclick="cancelDL(${id})">✕</button>`:''} ${d.done?'<span class="dlb ok">✓</span>':''}${d.error?`<span class="dlb er">✗</span>`:''}`;}
+
+// ── Upload ────────────────────────────────────────────────────────
+function openUpload(){
+  S.selFiles=[];$('ulst').innerHTML='';$('pb').style.display='none';$('pf').style.width='0%';$('ubtn').disabled=false;open_('um');
+  const dz=$('dz');
+  dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov2');};
+  dz.ondragleave=()=>dz.classList.remove('ov2');
+  dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov2');addFiles([...e.dataTransfer.files]);};
+}
+function closeUpload(){close_('um');}
+function addFiles(files){
+  S.selFiles=[...S.selFiles,...files];
+  $('ulst').innerHTML=S.selFiles.map((f,i)=>`<div class="ulit"><span class="uln">${eH(f.name)}</span><span class="ulsz">${fmtSz(f.size)}</span><span class="ulst2" id="st${i}">—</span></div>`).join('');
+}
+async function doUpload(){
+  if(!S.selFiles.length){toast('No files selected','warn');return;}
+  $('ubtn').disabled=true;$('pb').style.display='block';
+  let done=0;
+  for(let i=0;i<S.selFiles.length;i++){
+    const st=$(`st${i}`);st.textContent='⏳';
+    try{const fd=new FormData();fd.append('files',S.selFiles[i]);await api('POST',`/api/files/${S.rid}/upload?path=${encodeURIComponent(S.path)}`,fd,true);st.textContent='✓';st.style.color='var(--grn)';}
+    catch{st.textContent='✗';st.style.color='var(--red)';}
+    done++;$('pf').style.width=`${(done/S.selFiles.length)*100}%`;
+  }
+  setTimeout(()=>{closeUpload();refresh();toast(`Uploaded ${done} file${done!==1?'s':''}`,done===S.selFiles.length?'ok':'warn');},400);
+}
+
+// ── Mkdir ─────────────────────────────────────────────────────────
+function openMkdir(){$('fn').value='';open_('mkm');setTimeout(()=>$('fn').focus(),80);}
+function closeMkdir(){close_('mkm');}
+async function doMkdir(){
+  const name=$('fn').value.trim();if(!name)return;
+  const full=S.path?`${S.path}/${name}`:name;
+  try{await api('POST',`/api/files/${S.rid}/mkdir?path=${encodeURIComponent(full)}`);closeMkdir();refresh();toast(`"${name}" created`,'ok');}
+  catch(e){toast(e.message,'err');}
+}
+
+// ── Rename ────────────────────────────────────────────────────────
+function openRename(item){S.pendRen=item;$('rn').value=item.name;open_('rnm');setTimeout(()=>{$('rn').focus();$('rn').select();},80);}
+function closeRename(){close_('rnm');S.pendRen=null;}
+async function doRename(){
+  const item=S.pendRen;if(!item)return;
+  const nn=$('rn').value.trim();if(!nn||nn===item.name){closeRename();return;}
+  try{await api('PATCH',`/api/files/${S.rid}/rename?path=${encodeURIComponent(item.path)}&new_name=${encodeURIComponent(nn)}`);closeRename();refresh();toast(`Renamed to "${nn}"`,'ok');}
+  catch(e){toast(e.message,'err');}
+}
+
+// ── Delete ────────────────────────────────────────────────────────
+function askDel(item){
+  S.pendDel=item;
+  $('delmsg').innerHTML=`Delete <strong>${eH(item.name)}</strong>${item.is_dir?' and all its contents':''}?<br><span style="color:var(--red);font-size:.78rem">This cannot be undone.</span>`;
+  open_('delm');
+}
+function closeDel(){close_('delm');S.pendDel=null;}
+async function confirmDel(){
+  const item=S.pendDel;if(!item)return;
+  try{await api('DELETE',`/api/files/${S.rid}/${item.path}`);closeDel();S.sel=null;updateIP(null);refresh();toast('Deleted','ok');}
+  catch(e){toast(e.message,'err');}
+}
+
+// ── Editor ────────────────────────────────────────────────────────
+async function openEdit(item){
+  S.editPath=item.path;$('edhdr').textContent=item.name;$('edta').value='Loading…';$('edta').readOnly=true;open_('edm');
+  try{const d=await api('GET',`/api/files/${S.rid}/text?path=${encodeURIComponent(item.path)}`);$('edta').value=d.content;$('edta').readOnly=false;$('edinfo').textContent=`${d.content.length.toLocaleString()} chars`;}
+  catch(e){$('edta').value=`Error: ${e.message}`;}
+}
+function closeEdit(){close_('edm');S.editPath=null;}
+async function saveEdit(){
+  if(!S.editPath)return;
+  try{await api('PUT',`/api/files/${S.rid}/text?path=${encodeURIComponent(S.editPath)}`,{content:$('edta').value});toast('Saved','ok');}
+  catch(e){toast(e.message,'err');}
+}
+
+// ── Account ───────────────────────────────────────────────────────
+function openAcct(){renderAcct();open_('acctm');}
+function closeAcct(){close_('acctm');}
+function renderAcct(){
+  const isSA=S.me.role==='superadmin',isA=S.me.role==='admin'||isSA;
+  $('acctb').innerHTML=`
+    <p style="font-size:.8rem;color:var(--t2);margin-bottom:16px">Signed in as <strong>${eH(S.me.username)}</strong> <span class="rb rb${S.me.role.replace('superadmin','sa').replace('admin','a').replace('user','u')}" style="margin-left:5px">${S.me.role}</span></p>
+    <h3 style="font-size:.82rem;margin-bottom:10px;color:var(--t2)">Change Password</h3>
+    <label>Current Password</label><input type="password" id="cpold" placeholder="Current">
+    <label>New Password</label><input type="password" id="cpnew" placeholder="New" style="margin-bottom:0">
+    <div class="mft" style="padding-top:10px"><button class="bp sm" onclick="doChangePw()">Update Password</button></div>
+    ${isA?`
+    <hr style="border:none;border-top:1px solid var(--bd);margin:18px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:.82rem;color:var(--t2)">Users</h3><button class="bg sm" onclick="openNewUserForm()">Add User</button></div>
+    <div id="utblw">Loading…</div>
+    ${isSA?`<hr style="border:none;border-top:1px solid var(--bd);margin:18px 0"><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bg sm" onclick="openRoots()">Manage Roots</button><button class="bg sm" onclick="openLogs()">View Logs</button></div>`:`<hr style="border:none;border-top:1px solid var(--bd);margin:18px 0"><button class="bg sm" onclick="openLogs()">View Logs</button>`}
+    `:''}`;
+  if(isA)loadUserTable();
+}
+async function loadUserTable(){
+  try{
+    const users=await api('GET','/api/auth/users');
+    $('utblw').innerHTML=`<table class="utbl"><thead><tr><th>Username</th><th>Role</th><th>Root Access</th><th></th></tr></thead><tbody>${users.map(u=>`<tr><td>${eH(u.username)}</td><td><span class="rb ${u.role==='superadmin'?'rbsa':u.role==='admin'?'rba':'rbu'}">${u.role}</span></td><td style="font-size:.7rem;color:var(--t2)">${(u.allowed_roots||[]).includes('*')?'All':(u.allowed_roots||[]).join(', ')||'—'}</td><td style="text-align:right;display:flex;gap:4px;justify-content:flex-end">${S.me.role==='superadmin'?`<button class="bg xs" onclick="editAccess('${esc(u.username)}','${esc((u.allowed_roots||[]).join(','))}')">Access</button>`:''} ${u.username!=='admin'?`<button class="bd2 xs" onclick="delUser('${esc(u.username)}')">Del</button>`:''}</td></tr>`).join('')}</tbody></table>`;
+  }catch(e){$('utblw').textContent=e.message;}
+}
+function openNewUserForm(){
+  $('acctb').innerHTML+= `<div id="nuform" style="margin-top:14px;border-top:1px solid var(--bd);padding-top:14px"><h3 style="font-size:.82rem;margin-bottom:10px">Add User</h3><label>Username</label><input id="nu-n" type="text" placeholder="username"><label>Password</label><input id="nu-p" type="password" placeholder="password"><label>Role</label><select id="nu-r" style="margin-bottom:14px"><option value="user">user</option><option value="admin">admin</option>${S.me.role==='superadmin'?'<option value="superadmin">superadmin</option>':''}</select><label>Allowed Roots (comma-sep, * for all)</label><input id="nu-rt" type="text" placeholder="*" style="margin-bottom:0"><div class="mft" style="padding-top:10px"><button class="bp sm" onclick="createUser()">Create</button></div></div>`;
+}
+async function createUser(){
+  const username=$('nu-n').value.trim(),password=$('nu-p').value,role=$('nu-r').value;
+  const rts=$('nu-rt').value.trim(); const allowed_roots=rts?rts.split(',').map(s=>s.trim()):[];
+  if(!username||!password){toast('Fill all fields','warn');return;}
+  try{await api('POST','/api/auth/users',{username,password,role,allowed_roots});toast(`User ${username} created`,'ok');renderAcct();}
+  catch(e){toast(e.message,'err');}
+}
+async function delUser(u){if(!confirm(`Delete user "${u}"?`))return;try{await api('DELETE',`/api/auth/users/${u}`);toast(`Deleted ${u}`,'ok');loadUserTable();}catch(e){toast(e.message,'err');}}
+function editAccess(u,cur){const nw=prompt(`Root access for ${u} (comma-sep IDs or *):`,cur);if(nw===null)return;api('PATCH',`/api/auth/users/${u}/access`,nw.split(',').map(s=>s.trim()).filter(Boolean)).then(()=>{toast('Updated','ok');loadUserTable();}).catch(e=>toast(e.message,'err'));}
+async function doChangePw(){
+  const old=$('cpold')?.value,nw=$('cpnew')?.value;if(!old||!nw){toast('Fill both fields','warn');return;}
+  try{await api('POST','/api/auth/change-password',{old_password:old,new_password:nw});$('cpold').value='';$('cpnew').value='';toast('Password updated','ok');}catch(e){toast(e.message,'err');}
+}
+
+// ── Logs ──────────────────────────────────────────────────────────
+function openLogs(){loadLogs();open_('logsm');}
+function closeLogs(){close_('logsm');}
+async function loadLogs(){
+  const u=$('lfu').value.trim(),a=$('lfa').value;
+  let url='/api/logs/?limit=300';if(u)url+=`&user=${encodeURIComponent(u)}`;if(a)url+=`&action=${encodeURIComponent(a)}`;
+  $('logb').innerHTML='<div class="ldg"><div class="spin"></div> Loading…</div>';
+  try{
+    const logs=await api('GET',url);
+    if(!logs.length){$('logb').innerHTML='<p style="color:var(--t3);padding:20px;text-align:center">No entries</p>';return;}
+    $('logb').innerHTML=`<table class="logtbl"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Path</th><th>Detail</th></tr></thead><tbody>${logs.map(e=>`<tr><td style="white-space:nowrap">${new Date(e.ts).toLocaleString()}</td><td>${eH(e.user||'')}</td><td><span class="ab ab-${e.action} ab-x">${e.action}</span></td><td style="font-family:monospace;font-size:.68rem;color:var(--t2)">${eH(e.path||'')}</td><td style="font-size:.7rem;color:var(--t3)">${eH(e.detail||'')}</td></tr>`).join('')}</tbody></table>`;
+  }catch(e){$('logb').textContent=e.message;}
+}
+
+// ── Roots ─────────────────────────────────────────────────────────
+function openRoots(){loadRootsModal();open_('rtm');}
+function closeRoots(){close_('rtm');}
+async function loadRootsModal(){
+  const roots=await api('GET','/api/roots');
+  $('rtb').innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.8rem;margin-bottom:16px">${roots.map(r=>`<tr><td style="padding:7px 10px;border-bottom:1px solid var(--bd)">${eH(r.label)}</td><td style="padding:7px 10px;border-bottom:1px solid var(--bd);font-family:monospace;font-size:.7rem;color:var(--t3)">${eH(r.path)}</td><td style="padding:7px 10px;border-bottom:1px solid var(--bd);text-align:right">${roots.length>1?`<button class="bd2 xs" onclick="delRoot('${esc(r.id)}')">Remove</button>`:''}</td></tr>`).join('')}</table>
+    <h3 style="font-size:.82rem;margin-bottom:10px;color:var(--t2)">Add Root</h3>
+    <label>Label</label><input id="nrl" type="text" placeholder="External Drive">
+    <label>System Path</label><input id="nrp" type="text" placeholder="/Volumes/MyDrive">
+    <div class="mft"><button class="bp sm" onclick="addRoot()">Add</button></div>`;
+}
+async function addRoot(){
+  const label=$('nrl').value.trim(),path=$('nrp').value.trim();if(!label||!path){toast('Fill label and path','warn');return;}
+  try{await api('POST','/api/roots',{label,path,icon:'💾'});toast(`Root "${label}" added`,'ok');S.roots=await api('GET','/api/roots');renderSidebar();loadRootsModal();}catch(e){toast(e.message,'err');}
+}
+async function delRoot(id){if(!confirm('Remove root?'))return;try{await api('DELETE',`/api/roots/${id}`);S.roots=await api('GET','/api/roots');renderSidebar();loadRootsModal();}catch(e){toast(e.message,'err');}}
+
+// ── Toast ─────────────────────────────────────────────────────────
+let toastT;
+function toast(msg,type='ok'){const t=$('toast');t.textContent=msg;t.className=`show ${type}`;clearTimeout(toastT);toastT=setTimeout(()=>t.className='',3000);}
+
+// ── Helpers ───────────────────────────────────────────────────────
+function streamURL(item){return `/api/stream/${S.rid}/${item.path}?token=${encodeURIComponent(S.tok)}`;}
+function $(id){return document.getElementById(id);}
+function open_(id){$(id).classList.add('open');}
+function close_(id){$(id).classList.remove('open');}
+function eH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function eA(s){return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function esc(s){return String(s||'').replace(/'/g,"\\'");}
+function fmtSz(b){if(b==null)return'';if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';if(b<1073741824)return(b/1048576).toFixed(1)+' MB';return(b/1073741824).toFixed(2)+' GB';}
+function fmtDt(iso){return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+function fmtT(s){if(!s||isNaN(s))return'0:00';const m=Math.floor(s/60),sec=Math.floor(s%60);return`${m}:${sec.toString().padStart(2,'0')}`;}
+
+// ── Theme ─────────────────────────────────────────────────────────
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  $('th-moon').style.display=t==='dark'?'block':'none';
+  $('th-sun').style.display=t==='light'?'block':'none';
+  localStorage.setItem('nas_theme',t);
+}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');}
+function initTheme(){applyTheme(localStorage.getItem('nas_theme')||'dark');}
+
+// ── Info panel toggle (desktop) ───────────────────────────────────
+function toggleInfoPanel(){
+  const p=$('ifp'),h=$('ifph'),btn=$('infotog');
+  const hidden=p.style.display==='none';
+  p.style.display=hidden?'flex':'none';
+  h.style.display=hidden?'block':'none';
+  btn.classList.toggle('on',hidden);
+  localStorage.setItem('nas_ifp',hidden?'1':'0');
+}
+function initInfoPanel(){
+  const saved=localStorage.getItem('nas_ifp');
+  if(saved==='0'){const p=$('ifp');const h=$('ifph');p.style.display='none';h.style.display='none';$('infotog').classList.remove('on');}
+}
+
+// ── Resize handle ─────────────────────────────────────────────────
+function initResize(){
+  const handle=$('ifph'),panel=$('ifp');
+  const saved=localStorage.getItem('nas_ifw');
+  if(saved){panel.style.width=saved+'px';}
+  handle.addEventListener('mousedown',e=>{
+    e.preventDefault();
+    const startX=e.clientX, startW=panel.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+    const onMove=e=>{
+      const nw=Math.max(180,Math.min(520,startW+(startX-e.clientX)));
+      panel.style.width=nw+'px';
+    };
+    const onUp=()=>{
+      handle.classList.remove('dragging');
+      document.body.style.cursor='';
+      document.body.style.userSelect='';
+      localStorage.setItem('nas_ifw',panel.offsetWidth);
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+    };
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  });
+}
+
+// ── Mobile sidebar ────────────────────────────────────────────────
+function toggleSidebar(){const sb=$('sidebar'),ov=$('sbov');const open=sb.classList.toggle('open');ov.classList.toggle('show',open);}
+function closeSidebar(){$('sidebar').classList.remove('open');$('sbov').classList.remove('show');}
+
+// ── Mobile info sheet ─────────────────────────────────────────────
+function toggleInfoSheet(){
+  const sheet=$('ifpmob'),bg=$('ifpsbg');
+  const open=sheet.classList.toggle('open');
+  bg.classList.toggle('show',open);
+  $('mobnav-info').classList.toggle('on',open);
+}
+function closeInfoSheet(){$('ifpmob').classList.remove('open');$('ifpsbg').classList.remove('show');$('mobnav-info').classList.remove('on');}
+
+function focusSearch(){$('si').focus();$('si').select();}
+
+// ── Keyboard ──────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){hideCtx();closeMM();closePDF();closeMkdir();closeUpload();closeDel();closeRename();closeEdit();closeAcct();closeLogs();closeRoots();closeSidebar();closeInfoSheet();}
+  if(e.key==='Enter'){if($('login').classList.contains('show'))doLogin();else if($('mkm').classList.contains('open'))doMkdir();else if($('rnm').classList.contains('open'))doRename();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='s'&&$('edm').classList.contains('open')){e.preventDefault();saveEdit();}
+  if(e.key==='F2'&&S.sel)openRename(S.sel);
+  if((e.metaKey||e.ctrlKey)&&e.key==='ArrowLeft')goBack();
+  if((e.metaKey||e.ctrlKey)&&e.key==='ArrowRight')goFwd();
+  if(e.key===' '&&S.queue.length&&!$('edm').classList.contains('open')){const a=document.activeElement;if(!a||a.tagName==='BODY'){e.preventDefault();togglePlay();}}
+});
+$('lp').addEventListener('keypress',e=>{if(e.key==='Enter')doLogin();});
+document.addEventListener('click',()=>hideCtx());
+
+// ── Boot ──────────────────────────────────────────────────────────
+function showApp(){
+  $('login').classList.remove('show');$('app').classList.add('show');
+  $('uname').textContent=S.me.username;$('av').textContent=(S.me.username[0]||'?').toUpperCase();
+  initResize();initInfoPanel();
+}
+
+(async()=>{
+  initTheme();
+  if(S.tok&&await checkAuth()){
+    showApp();
+    S.roots=await api('GET','/api/roots')||[];
+    renderSidebar();
+    if(S.roots.length)await go(S.roots[0].id,'',true);
+  }else{
+    $('login').classList.add('show');
+  }
+})();
+</script>
+</body>
+</html>

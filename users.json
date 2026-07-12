@@ -1,0 +1,10 @@
+{
+  "admin": {
+    "username": "admin",
+    "hashed_password": "$2b$12$/yqxxkUWwyOacr/qLSuv6uKXW/KuoCLkvcmdj4G94ohQ.0HxEejlW",
+    "role": "superadmin",
+    "allowed_roots": [
+      "*"
+    ]
+  }
+}
